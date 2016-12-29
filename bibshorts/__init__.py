@@ -26,11 +26,23 @@ class bib_entry:
         self.search_success = False
 
         doi_pattern = re.compile('doi = .*$', re.MULTILINE)
-        doi = doi_pattern.search(self.bibtex).group().lstrip("doi = ")
+        
+        try:
+            doi = doi_pattern.search(self.bibtex).group().lstrip("doi = {").\
+                    rstrip("},")
+
+        except AttributeError:
+            print("no DOI")
+            return
 
         print(doi)
+        url = "http://dx.doi.org/" + doi
 
-        
+        url_headers = {"Accept": "application/x-bibtex"}
+        r = requests.get(url, headers=url_headers)
+        print(r.text)
+        self.bibtex = r.text
+        self.search_sucess = True
 
 
     def set_key(self):
