@@ -9,7 +9,7 @@ with open(path.join(here, 'README')) as f:
 
 
 setup(
-    name='BibShort',
+    name='BibShorts',
 
 #    # No version number yet
 #    version='',
@@ -18,7 +18,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='github.com/stuartsale/BibShort',
+    url='github.com/stuartsale/BibShorts',
 
     # Author details
     author='Stuart Sale',
