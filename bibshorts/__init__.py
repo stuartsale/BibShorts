@@ -1,9 +1,26 @@
 from __future__ import print_function
-import requests            # for working with remote resources
+import hashlib
+import random
 import re            # regular expresions
-import os
+import requests            # for working with remote resources
+import urllib2
 
+from HTMLParser import HTMLParser  # python 2.x
+unescape = HTMLParser().unescape
 
+# fake google id (looks like it is a 16 elements hex)
+rand_str = str(random.random()).encode('utf8')
+google_id = hashlib.md5(rand_str).hexdigest()[:16]
+
+GOOGLE_SCHOLAR_URL = "http://scholar.google.com"
+# the cookie looks normally like:
+#        'Cookie' : 'GSP=ID=%s:CF=4' % google_id }
+# where CF is the format (e.g. bibtex). since we don't know the format yet, we
+# have to append it later
+HEADERS = {'User-Agent': 'Mozilla/5.0',
+           'Cookie': 'GSP=ID=%s' % google_id}
+
+FORMAT_BIBTEX = 4
 
 
 class bib_entry:
@@ -18,9 +35,9 @@ class bib_entry:
         return cmp(self.key, other.key)
 
 
-    def get_bibtex_doi(self):
+    def get_dx_doi(self):
         """ 
-        Scrape full bibtex off web if a doi is contained in entry
+        Scrape full bibtex off dx.doi.org if a doi is contained in entry
         """
 
         self.search_success = False
@@ -35,14 +52,47 @@ class bib_entry:
             print("no DOI")
             return
 
-        print(doi)
         url = "http://dx.doi.org/" + doi
 
         url_headers = {"Accept": "application/x-bibtex"}
         r = requests.get(url, headers=url_headers)
-        print(r.text)
         self.bibtex = r.text
         self.search_sucess = True
+
+
+    def get_google_doi(self):
+        """
+        Scrape full bibtex of google scholar using the doi as search term
+        """
+
+        self.search_success = False
+
+        doi_pattern = re.compile('doi = .*$', re.MULTILINE)
+        
+        try:
+            doi = doi_pattern.search(self.bibtex).group().lstrip("doi = {").\
+                    rstrip("},")
+
+        except AttributeError:
+            print("no DOI")
+            return
+
+        url = GOOGLE_SCHOLAR_URL + '/scholar?q=' + urllib2.quote(doi)
+
+        url_headers = HEADERS
+        url_headers['Cookie'] = url_headers['Cookie'] + ":CF=4"
+        r = requests.get(url, headers=url_headers)
+
+        bib_pattern = re.compile(r'<a href="([^"]*/scholar\.bib\?[^"]*)')
+        ref_list = bib_pattern.findall(r.text)
+        bibtex_url = unescape(ref_list[0])
+
+        r = requests.get(bibtex_url)
+        bibtex = r.text
+        bibtex.replace("=", " = ")
+        self.bibtex = bibtex
+        self.search_success = True
+        
 
 
     def set_key(self):
