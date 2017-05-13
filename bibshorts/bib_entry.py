@@ -1,27 +1,14 @@
 from __future__ import print_function
 import bibtexparser as bp
-import hashlib
-import random
+from HTMLParser import HTMLParser  # python 2.x
 import re            # regular expresions
 import requests            # for working with remote resources
 import urllib2
 
-from HTMLParser import HTMLParser  # python 2.x
+import google_scholar
+
+
 unescape = HTMLParser().unescape
-
-# fake google id (looks like it is a 16 elements hex)
-rand_str = str(random.random()).encode('utf8')
-google_id = hashlib.md5(rand_str).hexdigest()[:16]
-
-GOOGLE_SCHOLAR_URL = "http://scholar.google.com"
-# the cookie looks normally like:
-#        'Cookie' : 'GSP=ID=%s:CF=4' % google_id }
-# where CF is the format (e.g. bibtex). since we don't know the format yet, we
-# have to append it later
-HEADERS = {'User-Agent': 'Mozilla/5.0',
-           'Cookie': 'GSP=ID=%s' % google_id}
-
-FORMAT_BIBTEX = 4
 
 
 class BibEntry:
@@ -125,9 +112,9 @@ class BibEntry:
             print("no DOI")
             return
 
-        url = GOOGLE_SCHOLAR_URL + '/scholar?q=' + urllib2.quote(doi)
+        url = google_scholar.url_ + '/scholar?q=' + urllib2.quote(doi)
 
-        url_headers = HEADERS
+        url_headers = google_scholar.headers_
         url_headers['Cookie'] = url_headers['Cookie'] + ":CF=4"
         r = requests.get(url, headers=url_headers)
 
@@ -240,7 +227,7 @@ class BibEntry:
         for field in self.bibtex_dict:
             if field is not "ENTRYTYPE":
                 output_str += " {0} = \{{1}\},\n".format(
-                                    field, self.bbibtex_dict[field]))
+                                    field, self.bbibtex_dict[field])
         output_str += "}\n"
 
         return output_str
