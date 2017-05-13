@@ -97,9 +97,50 @@ class bib_entry:
 
         return bibtex
 
+    def merge_bibtex(self, new_bibtex, replace=False):
+        """ merge_bibtex(new_bibtex, replace=False)
+
+            Merge a new block of bibtex into the existing bibtex_dict.
+            If an attribute appears in both entries, either the original
+            or the  new value can be used.
+
+            bibtex_dict is overwritten by this method.
+
+            Parameters
+            ----------
+            new_bibtex : str
+                A new bibtex block as a single, multiline, string
+            replace : bool
+                Determine whether the new or original value of a 
+                shared attribute is used. If False the original, if
+                True the new value.
+
+            Returns
+            -------
+            None
+    """
+    new_bibtex_dict = bp.loads(new_bibtex).entries_dict.values()[0]
+
+    if replace:
+        for key in new_bibtex_dict:
+            self.bibtex_dict[key] = new_bibtex_dict[key]
+
+    else:
+        for key in new_bibtex_dict:
+            if key not in self.bibtex_dict:
+                self.bibtex_dict[key] = new_bibtex_dict[key]
+
     def set_key(self):
         """
         Alter the Bibtex entry's key to match prefered scheme
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
 
         replace_list = ["{", "\\", "}", "'", "`", '"', "\n", "\t", "^", " "]
