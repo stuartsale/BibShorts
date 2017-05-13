@@ -232,15 +232,15 @@ class BibEntry:
         self.key = name1+"_"+name2+"."+year
         print(self.key)
 
-    def bibtex_write(self, output_obj):
-        """
-        Dump bibtex to file.
-        """
+    def __str__(self):
+        output_str = ""
 
-        output_obj.write(self.bib_type+"{"+self.key+",\n")
+        output_str += "{0}\{{1}\}\n".format(self.bib_type, self.key)
 
         for field in self.bibtex_dict:
             if field is not "ENTRYTYPE":
-                output_obj.write(" {0} = \{{1}\},\n".format(
-                            field, self.bbibtex_dict[field]))
-        output_obj.write("}\n")
+                output_str += " {0} = \{{1}\},\n".format(
+                                    field, self.bbibtex_dict[field]))
+        output_str += "}\n"
+
+        return output_str
