@@ -231,3 +231,45 @@ class BibEntry:
         output_str += "}\n"
 
         return output_str
+
+    @classmethod
+    def from_bibtex(cls, bibtex, search=[["dx", False], ["Google", False]]):
+        """ from_bibtex(bibtex)
+
+            A factory function that creates a BibEntry instance,
+            searches the web to fill in any missing fields and sets
+            the entry's key.
+
+            Parameters
+            ----------
+            bibtex : str
+                The raw bibtex string
+            search : list
+                A list that contains entries which are themselves a list
+                of [search engine, replace] where replace indicates if the
+                values recovered from that search engine should overwrite 
+                those already in hand.
+                Allowable search engines are: "Google", "dx" .
+                If None no searches are performed.
+
+            Returns
+            -------
+            BibEntry
+                A BibEntry object with all attributes set, potentially
+                after qquerying some search engine(s)
+        """
+
+        new_entry = cls.__init__(bibtex)
+        new_entry.set_key()
+
+        for search_engine in search:
+            if search_engine[0] == "dx":
+                search_bibtex = new_entry.get_dx_doi()
+            elif search_engine[0] == "Google":
+                search_bibtex = new_entry.get_google_doi()
+            else:
+                raise ValueError("Search Engine Name not recognised.")
+
+            new_entry.merge(search_bibtex, search_engine[1])
+
+        return new_entry
