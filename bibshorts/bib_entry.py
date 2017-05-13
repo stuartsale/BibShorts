@@ -24,11 +24,38 @@ HEADERS = {'User-Agent': 'Mozilla/5.0',
 FORMAT_BIBTEX = 4
 
 
-class bib_entry:
+class BibEntry:
+    """ BibEntry
+
+        A class that holds a single bibtex entry.
+
+        It also provides various methods for querying and manipulating
+        entries.
+
+        Attributes
+        ----------
+        bibtex : str
+            The raw bibtex
+        bibtex_dict : dict
+            The bibtex entry as a dict, arranged as key: attribute pairs.
+        bibtype : str
+            The entry's type (e.g. ARTICLE, INPROCEEDINGS, etc).
+        key : str
+            The entry's bibtex key
+        search_success : bool
+            Whether the bib entry has successfully been retrieved from
+            an online search (e.g. of Google scholar, dx.doi.org, etc).
+    """
 
     def __init__(self, bibtex_in):
         """
-        Initialise the object with its arxiv reference number
+        Initialise the object with a string containing a single bibtex
+        entry
+
+        Parameters
+        ----------
+        bibtex_in : str
+            The raw bibtex entry
         """
         self.bibtex = bibtex_in
         self.bibtex_dict = bp.loads(self.bibtex).entries_dict.values()[0]
@@ -41,7 +68,16 @@ class bib_entry:
 
     def get_dx_doi(self):
         """
-        Scrape full bibtex off dx.doi.org if a doi is contained in entry
+        Scrape full bibtex off dx.doi.org if a doi is contained in entry.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+            A raw bibtex string as retrieved from dx.doi.org
         """
 
         doi_pattern = re.compile('doi = .*$', re.MULTILINE)
@@ -65,7 +101,16 @@ class bib_entry:
 
     def get_google_doi(self):
         """
-        Scrape full bibtex of google scholar using the doi as search term
+        Scrape full bibtex of google scholar using the doi as search term.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+            A raw bibtex string as retrieved from Google scholar
         """
 
         self.search_success = False
@@ -111,7 +156,7 @@ class bib_entry:
             new_bibtex : str
                 A new bibtex block as a single, multiline, string
             replace : bool
-                Determine whether the new or original value of a 
+                Determine whether the new or original value of a
                 shared attribute is used. If False the original, if
                 True the new value.
 
@@ -119,16 +164,16 @@ class bib_entry:
             -------
             None
     """
-    new_bibtex_dict = bp.loads(new_bibtex).entries_dict.values()[0]
+        new_bibtex_dict = bp.loads(new_bibtex).entries_dict.values()[0]
 
-    if replace:
-        for key in new_bibtex_dict:
-            self.bibtex_dict[key] = new_bibtex_dict[key]
-
-    else:
-        for key in new_bibtex_dict:
-            if key not in self.bibtex_dict:
+        if replace:
+            for key in new_bibtex_dict:
                 self.bibtex_dict[key] = new_bibtex_dict[key]
+
+        else:
+            for key in new_bibtex_dict:
+                if key not in self.bibtex_dict:
+                    self.bibtex_dict[key] = new_bibtex_dict[key]
 
     def set_key(self):
         """
