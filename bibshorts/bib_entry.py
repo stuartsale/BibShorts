@@ -11,7 +11,7 @@ import google_scholar
 unescape = HTMLParser().unescape
 
 
-class BibEntry:
+class BibEntry(object):
     """ BibEntry
 
         A class that holds a single bibtex entry.
@@ -218,7 +218,6 @@ class BibEntry:
                 .rstrip(",").replace("{", "").replace("}", ""))
 
         self.key = name1+"_"+name2+"."+year
-        print(self.key)
 
     def __str__(self):
         output_str = ""
