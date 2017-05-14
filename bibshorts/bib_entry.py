@@ -225,9 +225,9 @@ class BibEntry:
 
         output_str += "@{0}{{{1},\n".format(self.bibtype, self.key)
 
-        for field in self.bibtex_dict:
-            if field is not "ENTRYTYPE":
-                output_str += " {0} = {{{1}}},\n".format(
+        for field in sorted(self.bibtex_dict):
+            if field not in ["ENTRYTYPE", "ID"]:
+                output_str += " {0:>9} = {{{1}}},\n".format(
                                     field, self.bibtex_dict[field])
         output_str += "}\n"
 
