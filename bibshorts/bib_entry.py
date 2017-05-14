@@ -48,6 +48,7 @@ class BibEntry:
         self.bibtex_dict = bp.loads(self.bibtex).entries_dict.values()[0]
         self.bibtype = self.bibtex_dict['ENTRYTYPE']
 
+        self.key = None
         self.search_success = False
 
     def __cmp__(self, other):
@@ -190,7 +191,7 @@ class BibEntry:
             raise AttributeError("No author names found")
             return
 
-        name_pattern = re.compile('{[^,]*}')
+        name_pattern = re.compile('[^,]*')
         name1 = (name_pattern.search(author_list[0]).group().lstrip("{")
                  .rstrip("}"))
         name1 = (name1.replace("{", "").replace("\\", "").replace("}", "").
@@ -213,8 +214,8 @@ class BibEntry:
                 name2 = "only"
 
         year_pattern = re.compile('year = .*$', re.MULTILINE)
-        year = (year_pattern.search(self.bibtex).group().lstrip('year =').
-                rstrip(","))
+        year = (year_pattern.search(self.bibtex).group().lstrip('year =')
+                .rstrip(",").replace("{", "").replace("}", ""))
 
         self.key = name1+"_"+name2+"."+year
         print(self.key)
@@ -222,12 +223,12 @@ class BibEntry:
     def __str__(self):
         output_str = ""
 
-        output_str += "{0}\{{1}\}\n".format(self.bib_type, self.key)
+        output_str += "@{0}{{{1},\n".format(self.bibtype, self.key)
 
         for field in self.bibtex_dict:
             if field is not "ENTRYTYPE":
-                output_str += " {0} = \{{1}\},\n".format(
-                                    field, self.bbibtex_dict[field])
+                output_str += " {0} = {{{1}}},\n".format(
+                                    field, self.bibtex_dict[field])
         output_str += "}\n"
 
         return output_str
@@ -247,7 +248,7 @@ class BibEntry:
             search : list
                 A list that contains entries which are themselves a list
                 of [search engine, replace] where replace indicates if the
-                values recovered from that search engine should overwrite 
+                values recovered from that search engine should overwrite
                 those already in hand.
                 Allowable search engines are: "Google", "dx" .
                 If None no searches are performed.
@@ -259,7 +260,7 @@ class BibEntry:
                 after qquerying some search engine(s)
         """
 
-        new_entry = cls.__init__(bibtex)
+        new_entry = cls(bibtex)
         new_entry.set_key()
 
         for search_engine in search:
@@ -270,6 +271,6 @@ class BibEntry:
             else:
                 raise ValueError("Search Engine Name not recognised.")
 
-            new_entry.merge(search_bibtex, search_engine[1])
+            new_entry.merge_bibtex(search_bibtex, search_engine[1])
 
         return new_entry
