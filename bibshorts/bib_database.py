@@ -61,3 +61,21 @@ class BibDatabase(object):
                     break
             else:
                 i += 1
+
+    def write_to_file(self, filename):
+        """ write_to_file(filename)
+
+            Write the bibtex database to a *.bib file.
+
+            Parameters
+            ----------
+            filename : str
+                The name of the file to write to.
+
+            Returns
+            -------
+            None
+        """
+        output = open(filename, "w")
+        output.write(str(self))
+        output.close()
