@@ -1,3 +1,5 @@
+import glob
+
 from bib_entry import BibEntry
 
 
@@ -113,10 +115,38 @@ class BibDatabase(object):
         """
         new_database = cls()
 
-        input_file = open(filename, "r")
-        input_bibtex = input_file.read()
+        with open(filename, "r") as input_bibtex:
+            input_bibtex = input_file.read()
 
         new_database.extend_list(input_bibtex)
+        new_database.remove_duplicates()
+
+        return new_database
+
+    @classmethod
+    def from_dir(cls, dirname):
+        """ from_dir(dirname)
+
+            Create a database from a directory of *.bib files
+
+            Parameters
+            ----------
+            dirname : str
+                The name directory that contains bibtex files
+
+            Returns
+            -------
+            new_database : BibDatabase
+        """
+        new_database = cls()
+
+        filenames = glob.glob("{0}/*.bib".format(dirname))
+
+        for filename in filenames:
+            with open(filename, "r") as input_file:
+                input_bibtex = input_file.read()
+
+            new_database.extend_list(input_bibtex)
         new_database.remove_duplicates()
 
         return new_database
