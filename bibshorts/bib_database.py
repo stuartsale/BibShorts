@@ -19,12 +19,28 @@ class BibDatabase(object):
             representing an entry in a bibtex file.
     """
 
-    def __init__(self, raw_bibtex):
-        # SPlit raw_bibtex into individual entries
+    def __init__(self):
+        self.BibEntry_list = []
+
+    def extend_list(self, raw_bibtex):
+        """ extend_list(raw_bibtex)
+
+            Add additional entries to the database from some
+            raw bibtex.
+
+            Parameters
+            ----------
+            raw_bibtex : str
+                The raw bibtex containing the entry(ies) to be
+                added.
+
+            Returns
+            -------
+            None
+        """
+        # Split raw_bibtex into individual entries
         bibtex_list = ("@"+entry for entry in raw_bibtex.lstrip("@").split("@")
                        if entry)
-
-        self.BibEntry_list = []
 
         # Convert each raw entry into a BibEntry object
         for entry in bibtex_list:
@@ -79,3 +95,28 @@ class BibDatabase(object):
         output = open(filename, "w")
         output.write(str(self))
         output.close()
+
+    @classmethod
+    def from_file(cls, filename):
+        """ from_file(filename)
+
+            Create a database from a *.bib file
+
+            Parameters
+            ----------
+            filename : str
+                The name of the input bibtex file
+
+            Returns
+            -------
+            new_database : BibDatabase
+        """
+        new_database = cls()
+
+        input_file = open(filename, "r")
+        input_bibtex = input_file.read()
+
+        new_database.extend_list(input_bibtex)
+        new_database.remove_duplicates()
+
+        return new_database
