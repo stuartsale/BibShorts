@@ -164,7 +164,7 @@ class BibEntry(object):
         ref_list = bib_pattern.findall(r.text)
         bibtex_url = unescape(ref_list[0])
 
-        r = requests.get(bibtex_url)
+        r = requests.get(bibtex_url, headers=url_headers)
 
         # trap 503 errors etc
         if r.status_code != requests.codes.ok:

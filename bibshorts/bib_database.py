@@ -46,7 +46,9 @@ class BibDatabase(object):
 
         # Convert each raw entry into a BibEntry object
         for entry in bibtex_list:
-            self.BibEntry_list.append(BibEntry.from_bibtex(entry))
+            self.BibEntry_list.append(BibEntry.from_bibtex(
+                                                entry,
+                                                search=[["dx", False]]))
             print self.BibEntry_list[-1].key
 
     def __str__(self):
