@@ -52,6 +52,13 @@ class BibEntry(object):
         self.search_success = False
 
     def __cmp__(self, other):
+        if cmp(self.key, other.key):
+            if 'doi' in self.bibtex_dict and 'doi' in other.bibtex_dict:
+                return cmp(self.bibtex_dict['doi'], other.bibtex_dict['doi'])
+        else:
+            return False
+
+    def __lt__(self, other):
         return cmp(self.key, other.key)
 
     def get_dx_doi(self):
@@ -82,6 +89,12 @@ class BibEntry(object):
 
         url_headers = {"Accept": "application/x-bibtex"}
         r = requests.get(url, headers=url_headers)
+
+        # trap 503 errors etc
+        if r.status_code != requests.codes.ok:
+            print("Error code {0}".format(r.status_code))
+            raise IOError("Error code {0}".format(r.status_code))
+
         bibtex = r.text
         self.search_sucess = True
 
@@ -111,7 +124,7 @@ class BibEntry(object):
 
         except AttributeError:
             print("no DOI")
-            return
+            raise AttributeError("no DOI")
 
         url = google_scholar.url_ + '/scholar?q=' + urllib2.quote(doi)
 
@@ -119,11 +132,22 @@ class BibEntry(object):
         url_headers['Cookie'] = url_headers['Cookie'] + ":CF=4"
         r = requests.get(url, headers=url_headers)
 
+        # trap 503 errors etc
+        if r.status_code != requests.codes.ok:
+            print("Error code {0}".format(r.status_code))
+            raise IOError("Error code {0}".format(r.status_code))
+
         bib_pattern = re.compile(r'<a href="([^"]*/scholar\.bib\?[^"]*)')
         ref_list = bib_pattern.findall(r.text)
         bibtex_url = unescape(ref_list[0])
 
         r = requests.get(bibtex_url)
+
+        # trap 503 errors etc
+        if r.status_code != requests.codes.ok:
+            print("Error code {0}".format(r.status_code))
+            raise IOError("Error code {0}".format(r.status_code))
+
         bibtex = r.text
         bibtex = bibtex.replace("=", " = ")
         self.search_success = True
@@ -264,12 +288,22 @@ class BibEntry(object):
 
         for search_engine in search:
             if search_engine[0] == "dx":
-                search_bibtex = new_entry.get_dx_doi()
+                try:
+                    search_bibtex = new_entry.get_dx_doi()
+                    search_success = True
+                except:
+                    search_success = False
             elif search_engine[0] == "Google":
-                search_bibtex = new_entry.get_google_doi()
+                try:
+                    search_bibtex = new_entry.get_google_doi()
+                    search_success = True
+                except:
+                    search_success = False
             else:
                 raise ValueError("Search Engine Name not recognised.")
 
-            new_entry.merge_bibtex(search_bibtex, search_engine[1])
+            if search_success:
+                new_entry.merge_bibtex(search_bibtex, search_engine[1])
+
 
         return new_entry
