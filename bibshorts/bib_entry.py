@@ -57,7 +57,7 @@ class BibEntry(object):
             if 'doi' in self.bibtex_dict and 'doi' in other.bibtex_dict:
                 return self.bibtex_dict['doi'] == other.bibtex_dict['doi']
             else:
-                return False
+                return True
         else:
             return False
 
@@ -106,7 +106,7 @@ class BibEntry(object):
 
         except AttributeError:
             print("no DOI")
-            return
+            raise AttributeError("no DOI")
 
         url = "http://dx.doi.org/" + doi
 
@@ -225,6 +225,7 @@ class BibEntry(object):
 
         replace_list = ["{", "\\", "}", "'", "`", '"', "\n", "\t", "^", " "]
 
+        # find authors
         try:
             author_list = self.bibtex_dict['author'].split(' and ')
         except:
@@ -238,6 +239,7 @@ class BibEntry(object):
             raise AttributeError("No author names found")
             return
 
+        # first author
         name_pattern = re.compile('[^,]*')
         name1 = (name_pattern.search(author_list[0]).group().lstrip("{")
                  .rstrip("}"))
@@ -246,9 +248,11 @@ class BibEntry(object):
                  replace("\n", "").replace("\t", "").replace("^", "").
                  replace(" ", "").strip(" "))
 
+        # check if single author
         if len(author_list) == 1:
             name2 = "only"
 
+        # second author
         elif len(author_list) > 1:
             try:
                 name2 = name_pattern.search(author_list[1]).group().\
@@ -260,9 +264,13 @@ class BibEntry(object):
             except AttributeError:
                 name2 = "only"
 
+        # find year
         year_pattern = re.compile('year = .*$', re.MULTILINE)
-        year = (year_pattern.search(self.bibtex).group().lstrip('year =')
-                .rstrip(",").replace("{", "").replace("}", ""))
+        try:
+            year = (year_pattern.search(self.bibtex).group().lstrip('year =')
+                    .rstrip(",").replace("{", "").replace("}", ""))
+        except AttributeError:
+            year = "0000"
 
         self.key = name1+"_"+name2+"."+year
 
@@ -333,7 +341,6 @@ class BibEntry(object):
         """
 
         new_entry = cls(bibtex)
-        new_entry.set_key()
 
         for search_engine in search:
             if search_engine[0] == "dx":
@@ -354,4 +361,5 @@ class BibEntry(object):
             if search_success:
                 new_entry.merge_bibtex(search_bibtex, search_engine[1])
 
+        new_entry.set_key()
         return new_entry
