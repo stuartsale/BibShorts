@@ -94,6 +94,10 @@ class BibDatabase(object):
             -------
             None
         """
+        # First sort
+        self.BibEntry_list.sort()
+
+        # Now write
         output = open(filename, "w")
         output.write(str(self))
         output.close()

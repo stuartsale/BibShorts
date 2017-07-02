@@ -51,15 +51,38 @@ class BibEntry(object):
         self.key = None
         self.search_success = False
 
-    def __cmp__(self, other):
-        if cmp(self.key, other.key):
+    def __eq__(self, other):
+        if self.key == other.key:
             if 'doi' in self.bibtex_dict and 'doi' in other.bibtex_dict:
-                return cmp(self.bibtex_dict['doi'], other.bibtex_dict['doi'])
+                return self.bibtex_dict['doi'] == other.bibtex_dict['doi']
+            else:
+                return False
         else:
             return False
 
     def __lt__(self, other):
-        return cmp(self.key, other.key)
+        self_auth1 = self.key.split("_")[0]
+        other_auth1 = other.key.split("_")[0]
+
+        if not self_auth1 == other_auth1:
+            return self_auth1 < other_auth1
+
+        print(self.key, other.key, self_auth1,  other_auth1, (self_auth1==other_auth1))
+        self_auth2 = self.key.split(".")[0].split("_")[1]
+        other_auth2 = other.key.split(".")[0].split("_")[1]
+
+        if not self_auth2 == other_auth2:
+            if self_auth2 == "only":
+                return True
+            elif other_auth2 == "only":
+                return False
+            else:
+                return self_auth1 < other_auth1
+
+        self_year = self.key.split(".")[1]
+        other_year = other.key.split(".")[1]
+
+        return self_year < other_year
 
     def get_dx_doi(self):
         """
