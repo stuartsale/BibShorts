@@ -50,7 +50,8 @@ class BibDatabase(object):
                                                 entry,
                                                 search=[["dx", False], 
                                                         ["isbn", False]]))
-            print self.BibEntry_list[-1].key
+            print(self.BibEntry_list[-1].key,
+                  self.BibEntry_list[-1].search_successes)
 
     def __unicode__(self):
         out_str = ""
@@ -103,7 +104,8 @@ class BibDatabase(object):
         for entry in self.BibEntry_list:
             verified, missing = entry.verify_complete()
             if not verified:
-                print("{0} is missing entries: {1}".format(entry.key, missing))
+                print("{0} is missing entries: {1}  searched: {2}"
+                      .format(entry.key, missing, entry.search_successes))
 
         # Now write
         output = open(filename, "w")

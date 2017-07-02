@@ -33,9 +33,9 @@ class BibEntry(object):
             The entry's type (e.g. ARTICLE, INPROCEEDINGS, etc).
         key : str
             The entry's bibtex key
-        search_success : bool
-            Whether the bib entry has successfully been retrieved from
-            an online search (e.g. of Google scholar, dx.doi.org, etc).
+        search_successes : list
+            A list of which searches have been succesful
+            (e.g. of Google scholar, dx.doi.org, etc).
     """
 
     def __init__(self, bibtex_in):
@@ -53,7 +53,7 @@ class BibEntry(object):
         self.bibtype = self.bibtex_dict['ENTRYTYPE']
 
         self.key = None
-        self.search_success = False
+        self.search_successes = []
 
     def __eq__(self, other):
         if self.key == other.key:
@@ -108,7 +108,6 @@ class BibEntry(object):
                     rstrip("},")
 
         except AttributeError:
-            print("no DOI")
             raise AttributeError("no DOI")
 
         url = "http://dx.doi.org/" + doi
@@ -118,11 +117,9 @@ class BibEntry(object):
 
         # trap 503 errors etc
         if r.status_code != requests.codes.ok:
-            print("Error code {0}".format(r.status_code))
             raise IOError("Error code {0}".format(r.status_code))
 
         bibtex = r.text
-        self.search_sucess = True
 
         return bibtex
 
@@ -140,8 +137,6 @@ class BibEntry(object):
             A raw bibtex string as retrieved from Google scholar
         """
 
-        self.search_success = False
-
         doi_pattern = re.compile('doi = .*$', re.MULTILINE)
 
         try:
@@ -149,7 +144,6 @@ class BibEntry(object):
                     rstrip("},")
 
         except AttributeError:
-            print("no DOI")
             raise AttributeError("no DOI")
 
         url = google_scholar.url_ + '/scholar?q=' + urllib2.quote(doi)
@@ -160,7 +154,6 @@ class BibEntry(object):
 
         # trap 503 errors etc
         if r.status_code != requests.codes.ok:
-            print("Error code {0}".format(r.status_code))
             raise IOError("Error code {0}".format(r.status_code))
 
         bib_pattern = re.compile(r'<a href="([^"]*/scholar\.bib\?[^"]*)')
@@ -176,7 +169,6 @@ class BibEntry(object):
 
         bibtex = r.text
         bibtex = bibtex.replace("=", " = ")
-        self.search_success = True
 
         return bibtex
 
@@ -398,6 +390,7 @@ class BibEntry(object):
                 raise ValueError("Search Engine Name not recognised.")
 
             if search_success:
+                new_entry.search_successes.append(search_engine[0])
                 new_entry.merge_bibtex(search_bibtex, search_engine[1])
 
         new_entry.set_key()
