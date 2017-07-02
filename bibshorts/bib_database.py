@@ -51,10 +51,10 @@ class BibDatabase(object):
                                                 search=[["dx", False]]))
             print self.BibEntry_list[-1].key
 
-    def __str__(self):
+    def __unicode__(self):
         out_str = ""
         for entry in self.BibEntry_list:
-            out_str += "{0:s}\n".format(entry)
+            out_str += u"{0:s}\n".format(entry)
         return out_str
 
     def __len__(self):
@@ -106,7 +106,8 @@ class BibDatabase(object):
 
         # Now write
         output = open(filename, "w")
-        output.write(str(self))
+        to_write = unicode(self).encode('utf-8')
+        output.write(to_write)
         output.close()
 
     @classmethod

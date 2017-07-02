@@ -274,15 +274,15 @@ class BibEntry(object):
 
         self.key = name1+"_"+name2+"."+year
 
-    def __str__(self):
+    def __unicode__(self):
         output_str = ""
 
-        output_str += "@{0}{{{1},\n".format(self.bibtype, self.key)
+        output_str += u"@{0}{{{1},\n".format(self.bibtype, self.key)
 
         for field in sorted(self.bibtex_dict):
             if field not in ["ENTRYTYPE", "ID"]:
-                output_str += " {0:>9} = {{{1}}},\n".format(
-                                    field, self.bibtex_dict[field])
+                output_str += u" {0:>9} = {{{1}}},\n".format(
+                                        field, self.bibtex_dict[field])
         output_str += "}\n"
 
         return output_str
