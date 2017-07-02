@@ -99,6 +99,11 @@ class BibDatabase(object):
         # First sort
         self.BibEntry_list.sort()
 
+        for entry in self.BibEntry_list:
+            verified, missing = entry.verify_complete()
+            if not verified:
+                print("{0} is missing entries: {1}".format(entry.key, missing))
+
         # Now write
         output = open(filename, "w")
         output.write(str(self))

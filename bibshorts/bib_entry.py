@@ -6,6 +6,7 @@ import requests            # for working with remote resources
 import urllib2
 
 import google_scholar
+import requirements
 
 
 unescape = HTMLParser().unescape
@@ -67,7 +68,6 @@ class BibEntry(object):
         if not self_auth1 == other_auth1:
             return self_auth1 < other_auth1
 
-        print(self.key, other.key, self_auth1,  other_auth1, (self_auth1==other_auth1))
         self_auth2 = self.key.split(".")[0].split("_")[1]
         other_auth2 = other.key.split(".")[0].split("_")[1]
 
@@ -279,6 +279,32 @@ class BibEntry(object):
 
         return output_str
 
+    def verify_complete(self):
+        """ verify_complete()
+
+            Check if an instance has all the bibtex fields that it
+            should have.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            verified : bool
+                True if all fields are present, False otherwise
+            missing_fields : list
+                A list of missing fields
+        """
+        missing_fields = []
+        for req in requirements.required[self.bibtype.lower()]:
+            if req not in self.bibtex_dict:
+                missing_fields.append(req)
+
+        verified = (len(missing_fields) == 0)
+
+        return verified, missing_fields
+
     @classmethod
     def from_bibtex(cls, bibtex, search=[["dx", False], ["Google", False]]):
         """ from_bibtex(bibtex)
@@ -327,6 +353,5 @@ class BibEntry(object):
 
             if search_success:
                 new_entry.merge_bibtex(search_bibtex, search_engine[1])
-
 
         return new_entry
