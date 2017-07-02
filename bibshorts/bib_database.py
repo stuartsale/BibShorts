@@ -48,7 +48,8 @@ class BibDatabase(object):
         for entry in bibtex_list:
             self.BibEntry_list.append(BibEntry.from_bibtex(
                                                 entry,
-                                                search=[["dx", False]]))
+                                                search=[["dx", False], 
+                                                        ["isbn", False]]))
             print self.BibEntry_list[-1].key
 
     def __unicode__(self):
@@ -127,7 +128,7 @@ class BibDatabase(object):
         """
         new_database = cls()
 
-        with open(filename, "r") as input_bibtex:
+        with open(filename, "r") as input_file:
             input_bibtex = input_file.read()
 
         new_database.extend_list(input_bibtex)

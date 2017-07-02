@@ -4,12 +4,15 @@ from HTMLParser import HTMLParser  # python 2.x
 import re            # regular expresions
 import requests            # for working with remote resources
 import urllib2
+import isbnlib as isbn
+from isbnlib.registry import bibformatters
 
 import google_scholar
 import requirements
 
 
 unescape = HTMLParser().unescape
+bibtex_formatter = bibformatters['bibtex']
 
 
 class BibEntry(object):
@@ -177,6 +180,35 @@ class BibEntry(object):
 
         return bibtex
 
+    def get_isbnlib_isbn(self):
+        """ get_isbnlib_isbn()
+
+            scrape Bibtex using the isbnlib and the given isbn.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                A raw bibtex string 
+        """
+        if "isbn" in self.bibtex_dict:
+            if (isbn.is_isbn10(self.bibtex_dict["isbn"])
+                or isbn.is_isbn13(self.bibtex_dict["isbn"])):
+                    try:
+                        bibtex = bibtex_formatter(
+                                    isbn.meta(self.bibtex_dict["isbn"],
+                                              service='wcat'))
+                        return bibtex
+                    except isbn.DataWrongShapeError:
+                        pass
+            else:
+                raise AttributeError("No valid ISBN present")
+        else:
+            raise AttributeError("No ISBN present")
+
     def merge_bibtex(self, new_bibtex, replace=False):
         """ merge_bibtex(new_bibtex, replace=False)
 
@@ -314,7 +346,8 @@ class BibEntry(object):
         return verified, missing_fields
 
     @classmethod
-    def from_bibtex(cls, bibtex, search=[["dx", False], ["Google", False]]):
+    def from_bibtex(cls, bibtex, search=[["dx", False], ["Google", False],
+                                         ["isbn", False]]):
         """ from_bibtex(bibtex)
 
             A factory function that creates a BibEntry instance,
@@ -352,6 +385,12 @@ class BibEntry(object):
             elif search_engine[0] == "Google":
                 try:
                     search_bibtex = new_entry.get_google_doi()
+                    search_success = True
+                except:
+                    search_success = False
+            elif search_engine[0] == "isbn":
+                try:
+                    search_bibtex = new_entry.get_isbnlib_isbn()
                     search_success = True
                 except:
                     search_success = False
