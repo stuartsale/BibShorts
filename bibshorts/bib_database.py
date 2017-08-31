@@ -48,7 +48,7 @@ class BibDatabase(object):
         for entry in bibtex_list:
             self.BibEntry_list.append(BibEntry.from_bibtex(
                                                 entry,
-                                                search=[["dx", False], 
+                                                search=[["dx", False],
                                                         ["isbn", False]]))
             print(self.BibEntry_list[-1].key,
                   self.BibEntry_list[-1].search_successes)
@@ -110,6 +110,36 @@ class BibDatabase(object):
         # Now write
         output = open(filename, "w")
         to_write = unicode(self).encode('utf-8')
+        output.write(to_write)
+        output.close()
+
+    def csv_dump(self, filename):
+        """ csv_dump(filename)
+
+            Dump the database to a csv like file (using semi-colons
+            in place of commas).
+
+            Parameters
+            ----------
+            filename : str
+                The name of the file to which the database summary is
+                dumped
+
+            Returns
+            -------
+            None
+        """
+
+        # First sort
+        self.BibEntry_list.sort()
+
+        # now write
+        output_text = u""
+        for entry in self.BibEntry_list:
+            output_text += u"{0}\n".format(entry.csv_string())
+
+        output = open(filename, "w")
+        to_write = output_text.encode('utf-8')
         output.write(to_write)
         output.close()
 

@@ -184,7 +184,7 @@ class BibEntry(object):
             Returns
             -------
             str
-                A raw bibtex string 
+                A raw bibtex string
         """
         if "isbn" in self.bibtex_dict:
             if (isbn.is_isbn10(self.bibtex_dict["isbn"])
@@ -336,6 +336,38 @@ class BibEntry(object):
         verified = (len(missing_fields) == 0)
 
         return verified, missing_fields
+
+    def csv_string(self):
+        """ csv_string()
+
+            Return a string in csv format
+
+            Parameters
+            ----------
+            None
+
+            Return
+            ------
+            out_str : str
+                A string set up in csv like format containg key,
+                authors, year, title
+        """
+
+        out_str = u""
+
+        # key
+        out_str += self.key
+
+        # other fields
+        for field in ["author", "year", "title"]:
+            out_str += u" ; "
+            try:
+                out_str += u"{0}".format(self.bibtex_dict[field].replace('"',
+                                                                         ''))
+            except KeyError:
+                out_str += u"MISSING"
+
+        return out_str
 
     @classmethod
     def from_bibtex(cls, bibtex, search=[["dx", False], ["Google", False],
