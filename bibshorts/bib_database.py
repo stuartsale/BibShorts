@@ -46,12 +46,15 @@ class BibDatabase(object):
 
         # Convert each raw entry into a BibEntry object
         for entry in bibtex_list:
-            self.BibEntry_list.append(BibEntry.from_bibtex(
-                                                entry,
-                                                search=[["dx", False],
-                                                        ["isbn", False]]))
-            print(self.BibEntry_list[-1].key,
-                  self.BibEntry_list[-1].search_successes)
+            try:
+                self.BibEntry_list.append(BibEntry.from_bibtex(
+                                                    entry,
+                                                    search=[["dx", False],
+                                                            ["isbn", False]]))
+                print(self.BibEntry_list[-1].key,
+                      self.BibEntry_list[-1].search_successes)
+            except (AttributeError, IndexError, ValueError):
+                print("Parsing Failed")
 
     def __unicode__(self):
         out_str = ""
